@@ -65,9 +65,11 @@ from a compiled Zig kernel instead of the Python controller. Two control laws ar
 compiled:
 
 ```bash
-shinro build scenarios/base_tracking.toml      --import shinro_demo_lekiwi --out build/compiled_base   # KF + MPC_LTI
-shinro build scenarios/base_tracking_mppi.toml --import shinro_demo_lekiwi --out build/compiled_mppi   # KF + MPPI
-python -m demos.demo_compiled_control          # [mpc|mppi|all]
+shinro build scenarios/base_tracking.toml      --import shinro_demo_lekiwi --out build/compiled_base   # KF + MPC_LTI (base)
+shinro build scenarios/base_tracking_mppi.toml --import shinro_demo_lekiwi --out build/compiled_mppi   # KF + MPPI (base)
+shinro build scenarios/arm_tracking.toml       --import shinro_demo_lekiwi --out build/compiled_arm    # KF + PID (arm)
+python -m demos.demo_compiled_control          # base: [mpc|mppi|all]
+python -m demos.demo_compiled_arm              # arm: base still, EE follows a 6-D B-spline
 ```
 
 The demo loads each `lib<name>.so` (the `shinro_step` C ABI) and drives the
@@ -75,11 +77,12 @@ MuJoCo closed loop from it — the host only samples the sensor, packs the input
 ports (drawing MPPI's `epsilon` perturbations host-side), and feeds the
 recurrent `state_*` ports back. It checks parity against the live Python loop in
 lockstep (same inputs each tick): MPC reproduces to QP-solver precision (~1e-6),
-MPPI to float exactness (~1e-15).
+MPPI to float exactness (~1e-15), PID to bit exactness (0.0).
 
-Each GIF is a composite (1800x720): a top-down MuJoCo scene, a **bird's-eye
-x-y plot** of the B-spline control polygon + reference curve + the base's actual
-path, and a side panel of tracking error vs time.
+Each GIF is a composite (1800x720): a 3-D scene, a **bird's-eye x-y plot** (base
+demos) or a **3-D end-effector path plot** (arm demo) of the reference curve vs
+the actual trajectory, and a side panel of tracking error vs time (position and,
+for the base, heading).
 
 The builds are **ReleaseFast** (`[compile].optimize = "release"`). The kernel is
 a plain C-ABI artifact, so it is language-agnostic — `make interop` calls the

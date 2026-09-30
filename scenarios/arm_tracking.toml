@@ -1,0 +1,40 @@
+# Arm tracking: closed-loop Trajectory -> PID -> Kalman -> ArmRobot (base held still).
+# The end-effector follows a clamped cubic B-spline in 6D pose.
+[scenario]
+name = "arm_tracking"
+description = "PID + Kalman track a B-spline end-effector path on the SO-ARM100"
+duration = 6.0
+dt = 0.02
+tolerance = { steady_state = 0.05, estimator = 0.03 }
+input_limits = { min = [-0.5, -0.5, -0.5, -0.5, -0.5, -0.5], max = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5] }
+
+[physics]
+preset = "lekiwi"
+
+[plant]
+name = "arm"
+
+[controller]
+type = "PID"
+config = "configs/controllers/pid_arm.toml"
+
+[estimator]
+type = "KalmanFilter"
+config = "configs/estimators/kalman_arm.toml"
+
+[trajectory]
+type = "bspline"
+config = "configs/trajectories/arm_bspline.toml"
+
+[sim]
+config = "configs/robot_config.toml"
+
+[noise.measurement]
+std = [0.005, 0.005, 0.005, 0.01, 0.01, 0.01]
+
+# Compile-time spec: the 6D end-effector pose (n_x) and the 6D Cartesian twist (n_u).
+[compile]
+optimize = "release"
+artifact_name = "libarm"
+n_x = 6
+n_u = 6

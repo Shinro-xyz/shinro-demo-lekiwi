@@ -68,6 +68,7 @@ class TrackingPanels:
         self.path_wh, self.err_wh, self.dpi = path_wh, err_wh, dpi
         self._t: list[float] = []
         self._err: list[float] = []
+        self._herr: list[float] = []
         self._base: list[np.ndarray] = []
 
         self.fig = plt.figure(figsize=(path_wh[0] + err_wh[0], path_wh[1]), dpi=dpi)
@@ -98,18 +99,21 @@ class TrackingPanels:
 
         # ── tracking-error panel ──────────────────────────────────────────
         eax = self.ax_err
-        (self.line_err,) = eax.plot([], [], "-", color="tab:red", lw=1.6)
+        (self.line_err,) = eax.plot([], [], "-", color="tab:red", lw=1.6, label="position |Δxy| [m]")
+        (self.line_herr,) = eax.plot([], [], "-", color="tab:purple", lw=1.4, label="heading |Δθ| [rad]")
         eax.set_xlim(0.0, duration)
         eax.set_ylim(bottom=0.0)
         eax.set_xlabel("t [s]")
-        eax.set_ylabel("|base − ref| [m]")
+        eax.set_ylabel("error")
         eax.set_title("tracking error", fontsize=11)
         eax.grid(True, alpha=0.3)
+        eax.legend(loc="upper right", fontsize=8, framealpha=0.9)
 
-    def update(self, base_xy, reference_xy, t: float, error: float) -> None:
+    def update(self, base_xy, reference_xy, t: float, error: float, heading_error: float = 0.0) -> None:
         self._base.append(np.asarray(base_xy, dtype=np.float64)[:2])
         self._t.append(t)
         self._err.append(error)
+        self._herr.append(heading_error)
 
         base = np.array(self._base)
         self.line_base.set_data(base[:, 0], base[:, 1])
@@ -117,10 +121,87 @@ class TrackingPanels:
         self.pt_ref.set_data([np.asarray(reference_xy)[0]], [np.asarray(reference_xy)[1]])
 
         self.line_err.set_data(self._t, self._err)
-        self.ax_err.set_ylim(0.0, max(0.02, max(self._err) * 1.15))
+        self.line_herr.set_data(self._t, self._herr)
+        top = max(0.02, max(self._err), max(self._herr)) * 1.15
+        self.ax_err.set_ylim(0.0, top)
 
     def frame(self) -> np.ndarray:
         """Render the two panels to an RGB array (height = path panel height)."""
         self.fig.canvas.draw()
         rgba = np.asarray(self.fig.canvas.buffer_rgba())
         return rgba[..., :3]
+
+
+class ArmPanels:
+    """A 3-D end-effector path panel (reference vs actual) and an error panel."""
+
+    def __init__(
+        self,
+        reference_xyz,
+        duration: float,
+        path_wh: tuple[float, float] = (6.4, 7.2),
+        err_wh: tuple[float, float] = (4.4, 7.2),
+        dpi: int = 100,
+    ):
+        ref = np.asarray(reference_xyz, dtype=np.float64)
+        self.path_wh, self.err_wh, self.dpi = path_wh, err_wh, dpi
+        self._t: list[float] = []
+        self._pos: list[float] = []
+        self._ori: list[float] = []
+        self._actual: list[np.ndarray] = []
+
+        self.fig = plt.figure(figsize=(path_wh[0] + err_wh[0], path_wh[1]), dpi=dpi)
+        gs = self.fig.add_gridspec(1, 2, width_ratios=[path_wh[0], err_wh[0]], wspace=0.24)
+        self.ax3d = self.fig.add_subplot(gs[0, 0], projection="3d")
+        self.ax_err = self.fig.add_subplot(gs[0, 1])
+
+        ax = self.ax3d
+        ax.plot(ref[:, 0], ref[:, 1], ref[:, 2], "--", color="tab:blue", lw=1.6, label="reference (B-spline)")
+        (self.line_actual,) = ax.plot([], [], [], "-", color="tab:orange", lw=2.0, label="EE path")
+        (self.pt_actual,) = ax.plot([], [], [], "o", color="tab:orange", ms=7)
+        (self.pt_ref,) = ax.plot([], [], [], "o", color="tab:blue", ms=6)
+        lo, hi = ref.min(axis=0) - 0.02, ref.max(axis=0) + 0.02
+        ax.set_xlim(lo[0], hi[0])
+        ax.set_ylim(lo[1], hi[1])
+        ax.set_zlim(lo[2], hi[2])
+        span = np.maximum(hi - lo, 1e-3)
+        ax.set_box_aspect(tuple(span / span.max()))
+        ax.set_xlabel("x [m]", fontsize=8)
+        ax.set_ylabel("y [m]", fontsize=8)
+        ax.set_zlabel("z [m]", fontsize=8)
+        ax.set_title("end-effector path: reference vs actual", fontsize=11)
+        ax.legend(loc="upper left", fontsize=8)
+
+        eax = self.ax_err
+        (self.line_pos,) = eax.plot([], [], "-", color="tab:red", lw=1.6, label="position |Δxyz| [m]")
+        (self.line_ori,) = eax.plot([], [], "-", color="tab:green", lw=1.4, label="orientation |Δrpy| [rad]")
+        eax.set_xlim(0.0, duration)
+        eax.set_ylim(bottom=0.0)
+        eax.set_xlabel("t [s]")
+        eax.set_ylabel("error")
+        eax.set_title("tracking error", fontsize=11)
+        eax.grid(True, alpha=0.3)
+        eax.legend(loc="upper right", fontsize=8, framealpha=0.9)
+
+    def update(self, ee_xyz, reference_xyz, t: float, pos_err: float, ori_err: float) -> None:
+        self._actual.append(np.asarray(ee_xyz, dtype=np.float64)[:3])
+        self._t.append(t)
+        self._pos.append(pos_err)
+        self._ori.append(ori_err)
+
+        actual = np.array(self._actual)
+        self.line_actual.set_data(actual[:, 0], actual[:, 1])
+        self.line_actual.set_3d_properties(actual[:, 2])
+        self.pt_actual.set_data([actual[-1, 0]], [actual[-1, 1]])
+        self.pt_actual.set_3d_properties([actual[-1, 2]])
+        ref = np.asarray(reference_xyz)
+        self.pt_ref.set_data([ref[0]], [ref[1]])
+        self.pt_ref.set_3d_properties([ref[2]])
+
+        self.line_pos.set_data(self._t, self._pos)
+        self.line_ori.set_data(self._t, self._ori)
+        self.ax_err.set_ylim(0.0, max(0.01, max(self._pos), max(self._ori)) * 1.15)
+
+    def frame(self) -> np.ndarray:
+        self.fig.canvas.draw()
+        return np.asarray(self.fig.canvas.buffer_rgba())[..., :3]

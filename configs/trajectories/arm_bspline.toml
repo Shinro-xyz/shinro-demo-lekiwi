@@ -1,0 +1,21 @@
+# Arm end-effector reference: a clamped cubic B-spline through 6D poses
+# [x, y, z, roll, pitch, yaw] (metres, radians). The arm stays put at the base;
+# only the end-effector sweeps. Same "the kernel consumes x_ref as a port"
+# property as the base B-spline.
+type = "bspline"
+dt = 0.02
+duration = 6.0
+
+degree = 3
+
+# The spline time parameter is the knot value, so the domain spans [0, duration].
+knots = [0.0, 0.0, 0.0, 0.0, 2.0, 4.0, 6.0, 6.0, 6.0, 6.0]
+
+control_points = [
+    [0.015, 0.150, 0.123, 2.0071, 0.00, 0.00],
+    [0.060, 0.130, 0.170, 2.00, 0.05, 0.05],
+    [0.110, 0.070, 0.210, 1.96, 0.10, 0.10],
+    [0.150, 0.000, 0.190, 1.95, 0.08, 0.08],
+    [0.160, -0.050, 0.140, 1.98, 0.04, 0.04],
+    [0.150, -0.080, 0.120, 2.00, 0.00, 0.00],
+]
