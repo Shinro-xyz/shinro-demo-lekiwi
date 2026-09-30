@@ -41,5 +41,3 @@ std = [0.01, 0.01, 0.02]
 [compile]
 optimize = "release"
 artifact_name = "libmppi"
-n_x = 3
-n_u = 3

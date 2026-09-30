@@ -32,7 +32,10 @@ config = "configs/robot_config.toml"
 [noise.measurement]
 std = [0.005, 0.005, 0.005, 0.01, 0.01, 0.01]
 
-# Compile-time spec: the 6D end-effector pose (n_x) and the 6D Cartesian twist (n_u).
+# Compile-time spec: the 6-D end-effector pose (n_x) and 6-D Cartesian twist
+# (n_u). The arm plant is not standalone-constructible — RobotSim injects its
+# engine + joint_groups — so the dims stay explicit (a [plant] type/config
+# cannot be derived here).
 [compile]
 optimize = "release"
 artifact_name = "libarm"

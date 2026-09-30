@@ -13,6 +13,8 @@ preset = "lekiwi"
 
 [plant]
 name = "base"
+type = "HolonomicMobileRobot"
+config = "configs/plants/holonomic_base.toml"
 
 [controller]
 type = "MPC_LTI"
@@ -32,11 +34,9 @@ config = "configs/robot_config.toml"
 [noise.measurement]
 std = [0.01, 0.01, 0.02]
 
-# Compile-time spec for the compilation pipeline. n_x / n_u are baked into the
-# graph at trace time; MPC needs its QP solver baked too.
+# Compile-time spec for the compilation pipeline. n_x / n_u are derived from the
+# [plant] section; MPC needs its QP solver baked too.
 [compile]
 optimize = "release"
 artifact_name = "libbase"
-n_x = 3
-n_u = 3
 solver = "emosqp"
