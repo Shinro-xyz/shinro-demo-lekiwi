@@ -1,51 +1,81 @@
 type = "phase_list"
 dt = 0.02
 
+# Full pick-and-place cycle: the arm reaches forward to a block in front, picks
+# it up, the base drives out, the arm sets it down, and the base returns home.
+#
+#   arm  = Cartesian velocity twist [dx, dy, dz, droll, dpitch, dyaw]
+#   base = [vx, vy, wz]  (world velocity, m/s and rad/s)
+#   jaw  = gripper setpoint (0.0 = open, 0.5 = closed)
+
+# 1. reach forward + down to the block in front of the robot
 [[phases]]
-duration = 1.5
+duration = 1.8
 [phases.signals]
-arm = [0.0, -0.8, 1.2, 0.5, 0.0, 0.0]
+arm = [0.9, -0.7, 0.2, 0.0, 0.0, 0.0]
 base = [0.0, 0.0, 0.0]
 jaw = [0.0]
 
+# 2. close the gripper (pick)
 [[phases]]
 duration = 1.0
 [phases.signals]
-arm = [0.0, -0.8, 1.2, 0.5, 0.0, 0.0]
+arm = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 base = [0.0, 0.0, 0.0]
 jaw = [0.5]
 
+# 3. lift the block clear of the ground
 [[phases]]
-duration = 1.5
+duration = 1.2
 [phases.signals]
-arm = [0.0, -0.3, 0.8, 0.0, 0.0, 0.0]
+arm = [0.0, 0.0, 0.4, 0.0, 0.0, 0.0]
 base = [0.0, 0.0, 0.0]
 jaw = [0.5]
 
+# 4. carry it out to the drop location (+0.9 m at 0.3 m/s)
 [[phases]]
 duration = 3.0
 [phases.signals]
-arm = [0.0, -0.3, 0.8, 0.0, 0.0, 0.0]
+arm = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 base = [0.3, 0.0, 0.0]
 jaw = [0.5]
 
-[[phases]]
-duration = 1.5
-[phases.signals]
-arm = [0.0, -0.8, 1.2, 0.5, 0.0, 0.0]
-base = [0.0, 0.0, 0.0]
-jaw = [0.5]
-
+# 5. settle down onto the drop location
 [[phases]]
 duration = 1.0
 [phases.signals]
-arm = [0.0, -0.8, 1.2, 0.5, 0.0, 0.0]
+arm = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+base = [0.0, 0.0, 0.0]
+jaw = [0.5]
+
+# 6. open the gripper (place down)
+[[phases]]
+duration = 1.0
+[phases.signals]
+arm = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 base = [0.0, 0.0, 0.0]
 jaw = [0.0]
 
+# 7. retract clear of the placed block
 [[phases]]
-duration = 1.5
+duration = 1.2
 [phases.signals]
-arm = [0.0, -0.3, 0.8, 0.0, 0.0, 0.0]
-base = [0.3, 0.0, 0.0]
+arm = [0.0, 0.0, 0.4, 0.0, 0.0, 0.0]
+base = [0.0, 0.0, 0.0]
+jaw = [0.0]
+
+# 8. drive back to the starting point (-0.9 m at 0.3 m/s)
+[[phases]]
+duration = 3.0
+[phases.signals]
+arm = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+base = [-0.3, 0.0, 0.0]
+jaw = [0.0]
+
+# 9. settle at home
+[[phases]]
+duration = 0.5
+[phases.signals]
+arm = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+base = [0.0, 0.0, 0.0]
 jaw = [0.0]

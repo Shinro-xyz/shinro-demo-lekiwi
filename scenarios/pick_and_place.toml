@@ -3,8 +3,8 @@
 # the schedule IS the control.
 [scenario]
 name = "pick_and_place"
-description = "phase_list schedule drives base + arm + gripper through a full pick-and-place sequence"
-duration = 11.0
+description = "phase_list schedule: pick a block, drive out, place it, and drive back to the start"
+duration = 13.7
 dt = 0.02
 
 [physics]

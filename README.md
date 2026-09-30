@@ -55,7 +55,7 @@ Override the framework path with `make install SHINRO=/path/to/shinro-python-mod
 python -m demos.demo_simple            # terminal output, no viewer
 python -m demos.demo_arm_trajectory    # arm trajectory + live viewer
 python -m demos.demo_base_tracking     # base tracking, LQR or MPC + observer
-python -m demos.demo_pick_and_place    # full pick-and-place sequence
+python -m demos.demo_pick_and_place    # pick a block, drive out, place it, drive back
 ```
 
 ## Test
