@@ -1,0 +1,54 @@
+# Pick-and-place arm reference: the end-effector pose [x, y, z, roll, pitch, yaw]
+# reaches down to the block, holds for the grip, lifts for the carry, holds while
+# the base drives, lowers to place, holds for the release, then retracts. Cubic
+# segments give exact holds (start == end) and smooth moves.
+type = "cubic_segments"
+dt = 0.02
+
+# reach down to the block
+[[segments]]
+start = [0.015, 0.150, 0.123, 2.0071, 0.0, 0.0]
+end = [0.200, -0.030, 0.025, 2.00, 0.0, 0.0]
+duration = 2.5
+
+# hold down (grip)
+[[segments]]
+start = [0.200, -0.030, 0.025, 2.00, 0.0, 0.0]
+end = [0.200, -0.030, 0.025, 2.00, 0.0, 0.0]
+duration = 1.0
+
+# lift the block
+[[segments]]
+start = [0.200, -0.030, 0.025, 2.00, 0.0, 0.0]
+end = [0.015, 0.150, 0.123, 2.0071, 0.0, 0.0]
+duration = 1.5
+
+# hold up (base drives out)
+[[segments]]
+start = [0.015, 0.150, 0.123, 2.0071, 0.0, 0.0]
+end = [0.015, 0.150, 0.123, 2.0071, 0.0, 0.0]
+duration = 4.0
+
+# lower to place
+[[segments]]
+start = [0.015, 0.150, 0.123, 2.0071, 0.0, 0.0]
+end = [0.200, -0.030, 0.025, 2.00, 0.0, 0.0]
+duration = 1.5
+
+# hold down (release)
+[[segments]]
+start = [0.200, -0.030, 0.025, 2.00, 0.0, 0.0]
+end = [0.200, -0.030, 0.025, 2.00, 0.0, 0.0]
+duration = 1.0
+
+# retract
+[[segments]]
+start = [0.200, -0.030, 0.025, 2.00, 0.0, 0.0]
+end = [0.015, 0.150, 0.123, 2.0071, 0.0, 0.0]
+duration = 1.5
+
+# hold up (base drives back)
+[[segments]]
+start = [0.015, 0.150, 0.123, 2.0071, 0.0, 0.0]
+end = [0.015, 0.150, 0.123, 2.0071, 0.0, 0.0]
+duration = 3.0

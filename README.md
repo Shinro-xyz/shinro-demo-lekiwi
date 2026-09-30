@@ -68,9 +68,18 @@ compiled:
 shinro build scenarios/base_tracking.toml      --import shinro_demo_lekiwi --out build/compiled_base   # KF + MPC_LTI (base)
 shinro build scenarios/base_tracking_mppi.toml --import shinro_demo_lekiwi --out build/compiled_mppi   # KF + MPPI (base)
 shinro build scenarios/arm_tracking.toml       --import shinro_demo_lekiwi --out build/compiled_arm    # KF + PID (arm)
+shinro build scenarios/pickplace_base.toml     --import shinro_demo_lekiwi --out build/compiled_ppbase # KF + MPC_LTI (base)
+shinro build scenarios/pickplace_arm.toml      --import shinro_demo_lekiwi --out build/compiled_pparm  # KF + PID (arm)
 python -m demos.demo_compiled_control          # base: [mpc|mppi|all]
 python -m demos.demo_compiled_arm              # arm: base still, EE follows a 6-D B-spline
+python -m demos.demo_compiled_pickplace        # MPC base + PID arm: pick, drive, drop, return
 ```
+
+The pick-and-place demo is the first **multi-plant** one: two compiled kernels (an
+MPC base and a PID arm) run on one shared sim via `host.drive_channels`, with a
+host-side phase machine handling the jaw and the kinematic block. The arm's
+end-effector reference is a *world* pose, so it is offset by the base trajectory
+each tick to move with the base.
 
 The demo loads each `lib<name>.so` (the `shinro_step` C ABI) and drives the
 MuJoCo closed loop from it — the host only samples the sensor, packs the input

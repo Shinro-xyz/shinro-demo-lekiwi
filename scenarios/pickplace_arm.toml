@@ -1,0 +1,38 @@
+# Pick-and-place arm: closed-loop Trajectory -> PID -> Kalman -> ArmRobot.
+# Compiled to the arm kernel; the host runs it alongside the base kernel.
+[scenario]
+name = "pickplace_arm"
+description = "PID + Kalman track the pick-and-place end-effector pose (reach/lift/lower)"
+duration = 16.0
+dt = 0.02
+input_limits = { min = [-0.5, -0.5, -0.5, -0.5, -0.5, -0.5], max = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5] }
+
+[physics]
+preset = "lekiwi"
+
+[plant]
+name = "arm"
+type = "ArmRobot"
+config = "configs/plants/armrobot.toml"
+
+[controller]
+type = "PID"
+config = "configs/controllers/pid_arm.toml"
+
+[estimator]
+type = "KalmanFilter"
+config = "configs/estimators/kalman_arm.toml"
+
+[trajectory]
+type = "cubic_segments"
+config = "configs/trajectories/pickplace_arm.toml"
+
+[sim]
+config = "configs/robot_config.toml"
+
+[noise.measurement]
+std = [0.005, 0.005, 0.005, 0.01, 0.01, 0.01]
+
+[compile]
+optimize = "release"
+artifact_name = "libpparm"

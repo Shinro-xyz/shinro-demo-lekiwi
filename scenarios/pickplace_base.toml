@@ -1,0 +1,39 @@
+# Pick-and-place base: closed-loop Trajectory -> MPC_LTI -> Kalman -> HolonomicMobileRobot.
+# Compiled to the base kernel; the host runs it alongside the arm kernel.
+[scenario]
+name = "pickplace_base"
+description = "MPC_LTI + Kalman track the pick-and-place base arc (out and back)"
+duration = 16.0
+dt = 0.02
+input_limits = { min = [-0.5, -0.5, -1.0], max = [0.5, 0.5, 1.0] }
+
+[physics]
+preset = "lekiwi"
+
+[plant]
+name = "base"
+type = "HolonomicMobileRobot"
+config = "configs/plants/holonomic_base.toml"
+
+[controller]
+type = "MPC_LTI"
+config = "configs/controllers/mpc_lti_base.toml"
+
+[estimator]
+type = "KalmanFilter"
+config = "configs/estimators/kalman_base.toml"
+
+[trajectory]
+type = "cubic_segments"
+config = "configs/trajectories/pickplace_base.toml"
+
+[sim]
+config = "configs/robot_config.toml"
+
+[noise.measurement]
+std = [0.01, 0.01, 0.02]
+
+[compile]
+optimize = "release"
+artifact_name = "libppbase"
+solver = "emosqp"

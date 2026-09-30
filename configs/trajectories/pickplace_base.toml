@@ -1,0 +1,41 @@
+# Pick-and-place base reference: hold at the origin for the pick, arc out to the
+# drop on one side, hold, then arc back on the other side. Cubic segments give
+# exact holds (start == end) and smooth point-to-point moves.
+type = "cubic_segments"
+dt = 0.02
+
+# hold at origin (arm picks)
+[[segments]]
+start = [0.0, 0.0, 0.0]
+end = [0.0, 0.0, 0.0]
+duration = 5.0
+
+# out, first half of the arc (bulge +y)
+[[segments]]
+start = [0.0, 0.0, 0.0]
+end = [0.40, 0.35, 0.0]
+duration = 2.0
+
+# out, second half (arrive at the drop)
+[[segments]]
+start = [0.40, 0.35, 0.0]
+end = [0.90, 0.0, 0.0]
+duration = 2.0
+
+# hold at the drop (arm places)
+[[segments]]
+start = [0.90, 0.0, 0.0]
+end = [0.90, 0.0, 0.0]
+duration = 4.0
+
+# back, first half of the arc (bulge -y, the other side)
+[[segments]]
+start = [0.90, 0.0, 0.0]
+end = [0.50, -0.35, 0.0]
+duration = 1.5
+
+# back, second half (return to origin)
+[[segments]]
+start = [0.50, -0.35, 0.0]
+end = [0.0, 0.0, 0.0]
+duration = 1.5
