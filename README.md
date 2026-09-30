@@ -77,6 +77,10 @@ recurrent `state_*` ports back. It checks parity against the live Python loop in
 lockstep (same inputs each tick): MPC reproduces to QP-solver precision (~1e-6),
 MPPI to float exactness (~1e-15).
 
+Each GIF is a composite (1800x720): a top-down MuJoCo scene, a **bird's-eye
+x-y plot** of the B-spline control polygon + reference curve + the base's actual
+path, and a side panel of tracking error vs time.
+
 The builds are **ReleaseFast** (`[compile].optimize = "release"`). The kernel is
 a plain C-ABI artifact, so it is language-agnostic — `make interop` calls the
 same `.so` from C, C++, Zig, and Python (see [`interop/`](./interop/)).

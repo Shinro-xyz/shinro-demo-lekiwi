@@ -154,10 +154,10 @@ GIF_HEIGHT = 400
 if RENDER_GIF:
     renderer = mujoco.Renderer(sim.engine.model, width=GIF_WIDTH, height=GIF_HEIGHT)
     camera = mujoco.MjvCamera()
-    camera.distance = 1.8
-    camera.azimuth = 135
-    camera.elevation = -20
-    camera.lookat[:] = [0.0, 0.0, 0.1]
+    camera.distance = 2.8
+    camera.azimuth = 0.0
+    camera.elevation = -89.0
+    camera.lookat[:] = [0.5, 0.0, 0.05]
     frames = []
 else:
     renderer = None

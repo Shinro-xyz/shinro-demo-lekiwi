@@ -40,6 +40,7 @@ from shinro.factories import ScenarioFactory
 from shinro.utils.config_resolver import resolve_config_path
 
 import shinro_demo_lekiwi  # noqa: F401  (importing the package registers the "lekiwi" preset)
+from shinro_demo_lekiwi.viz import TrackingPanels, birdseye_camera, compose_h
 
 HERE = Path(__file__).parent.parent
 
@@ -112,15 +113,20 @@ def run_from_kernel(scenario_path: str, artifact: str, kernel: str, render_path:
         with open(resolve_config_path(cfg["controller"]["config"]), "rb") as f:
             sigma = np.asarray(tomllib.load(f).get("noise_sigma", 1.0), dtype=np.float64)
 
-    renderer = camera = None
+    renderer = camera = panels = None
     frames = []
     if render_path is not None:
-        renderer = mujoco.Renderer(sim.engine.model, width=400, height=300)
+        ref_xy = np.asarray(traj)[:, :2]
+        control_points = None
+        traj_cfg = cfg.get("trajectory", {}).get("config")
+        if traj_cfg:
+            with open(resolve_config_path(traj_cfg), "rb") as f:
+                control_points = tomllib.load(f).get("control_points")
+        renderer = mujoco.Renderer(sim.engine.model, width=720, height=720)
         camera = mujoco.MjvCamera()
-        camera.distance = 1.6
-        camera.azimuth = 135
-        camera.elevation = -20
-        camera.lookat[:] = [0.0, 0.0, 0.1]
+        mid = ref_xy.mean(axis=0)
+        birdseye_camera(camera, lookat=(float(mid[0]), float(mid[1]), 0.05), distance=3.6)
+        panels = TrackingPanels(ref_xy, float(cfg["scenario"]["duration"]), control_points)
 
     inputs = np.zeros(max(n_in, 1))
     state = np.zeros(max(n_state, 1))
@@ -179,16 +185,15 @@ def run_from_kernel(scenario_path: str, artifact: str, kernel: str, render_path:
         sim.step()
 
         if renderer is not None and step % CAPTURE_EVERY == 0:
-            base = np.asarray(sim.base.get_state())
-            camera.lookat[:] = [float(base[0]), 0.0, 0.1]
+            base = np.asarray(sim.base.get_state(), dtype=np.float64)
+            panels.update(base[:2], ref[:2], step * dt, float(np.linalg.norm(base[:2] - ref[:2])))
             renderer.update_scene(sim.engine.data, camera)
-            frames.append(renderer.render())
+            frames.append(compose_h([renderer.render(), panels.frame()], height=720))
 
     if renderer is not None:
         renderer.close()
         Path(render_path).parent.mkdir(parents=True, exist_ok=True)
         iio.imwrite(render_path, frames, fps=50 // CAPTURE_EVERY, loop=0, plugin='pillow', optimize=True)
-
     return parity, frames
 
 

@@ -16,7 +16,7 @@ def load_model_assets(mesh_dir: Path) -> dict:
     return assets
 
 
-def inject_free_joint(xml_string: str) -> str:
+def inject_free_joint(xml_string: str, offscreen: int = 1280) -> str:
     """Nest the arm base body under the wheel base and insert a free joint.
 
     The stock LeKiwi MJCF has the arm as a sibling of the wheel base. This
@@ -24,8 +24,12 @@ def inject_free_joint(xml_string: str) -> str:
     base gains a free joint, enabling base mobility in MuJoCo. The XML is
     round-tripped through ``xml.etree.ElementTree``.
 
+    It also raises the offscreen framebuffer to ``offscreen`` x ``offscreen``
+    so demos can render larger than MuJoCo's 640x480 default.
+
     Args:
         xml_string: Original MJCF as a string.
+        offscreen: Offscreen framebuffer edge (px) for ``mujoco.Renderer``.
 
     Returns:
         Rewritten MJCF as a string.
@@ -51,6 +55,17 @@ def inject_free_joint(xml_string: str) -> str:
         fj = ET.Element('freejoint')
         wheel_base.insert(0, fj)
         wheel_base.append(arm_base)
+
+    # Raise the offscreen framebuffer so mujoco.Renderer can exceed 640x480.
+    visual = root.find('visual')
+    if visual is None:
+        visual = ET.SubElement(root, 'visual')
+    glob = visual.find('global')
+    if glob is None:
+        glob = ET.SubElement(visual, 'global')
+    glob.set('offwidth', str(offscreen))
+    glob.set('offheight', str(offscreen))
+
     return ET.tostring(root, encoding='unicode')
 
 
