@@ -1,0 +1,18 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[codz]
+*$py.class
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+
+# Test / tool caches
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# Demo media
+build/demos/
+*.gif

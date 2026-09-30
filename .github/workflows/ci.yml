@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The demo consumes shinro from a source checkout, so check it out as a
+      # sibling and install it editable (mirrors the local `make install`).
+      # NOTE: requires Shinro-xyz/shinro-python-modules#30 (the physics-preset
+      # registry) to be on `main`.
+      - name: Check out the shinro framework
+        uses: actions/checkout@v4
+        with:
+          repository: Shinro-xyz/shinro-python-modules
+          ref: main
+          path: shinro-python-modules
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e "./shinro-python-modules[mujoco]"
+          pip install -e ".[mujoco,media,dev]"
+
+      - name: Test
+        run: make test

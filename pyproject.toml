@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "shinro-demo-lekiwi"
+version = "0.1.0"
+description = "LeKiwi reference-robot demo for the shinro control framework: MJCF assets, configs, scenarios, and MuJoCo integration tests."
+readme = "README.md"
+requires-python = ">=3.12"
+# The `shinro` framework is intentionally NOT a hard dependency: it is consumed
+# from a source checkout (a sibling clone locally, a checked-out repo in CI) so
+# the demo tracks the framework's working tree. See README.md / Makefile.
+dependencies = ["numpy>=2.0"]
+
+[project.optional-dependencies]
+mujoco = ["mujoco>=3.0"]
+media = ["imageio>=2.30", "Pillow>=10.0", "matplotlib>=3.8"]
+dev = ["pytest>=8.0", "ruff>=0.5"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+shinro_demo_lekiwi = ["assets/**/*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src", "."]
+addopts = "-p no:cacheprovider"
+markers = [
+    "integration: full-loop physics-backed tests (require MuJoCo)",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 140
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Demo scripts set MUJOCO_GL=egl before importing mujoco, so their imports are
+# deliberately not at module top; they also predate the repo's style rules.
+"demos/*" = ["E402", "E702", "F841", "I001"]
+# Ported integration tests keep their original (older) style.
+"tests/*" = ["E402", "E501", "E702", "F841", "I001", "UP006", "UP007", "E741"]
