@@ -1,4 +1,4 @@
-.PHONY: install test test-quick demo
+.PHONY: install test test-quick demo interop
 
 # Path to the shinro framework checkout (sibling by default).
 SHINRO ?= ../shinro-python-modules
@@ -18,3 +18,9 @@ test-quick:
 
 demo:
 	python3 -m demos.demo_simple
+
+# Cross-language C-ABI interop for the compiled kernel (see interop/README.md).
+# Requires the compiled artifact: shinro build scenarios/base_tracking.toml \
+#   --import shinro_demo_lekiwi --out build/compiled_base
+interop:
+	$(MAKE) -C interop

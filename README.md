@@ -74,6 +74,11 @@ packs the input ports, and feeds the recurrent `state_*` ports back. It then
 re-runs the scenario with the live Python estimator/controller and reports the
 control parity (currently exact).
 
+The build is **ReleaseFast** (`[compile].optimize = "release"`): ~210 KB vs
+~11 MB debug. The kernel is a plain C-ABI artifact, so it is language-agnostic —
+`make interop` calls the same `.so` from C, C++, Zig, and Python and shows they
+agree (see [`interop/`](./interop/)).
+
 ## Test
 
 ```bash
