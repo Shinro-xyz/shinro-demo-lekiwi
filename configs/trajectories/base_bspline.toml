@@ -1,0 +1,23 @@
+# Smooth base reference: a clamped cubic B-spline through the control polygon.
+# The reference is (x, y, theta) — the holonomic base's state. The compiled
+# control law does not bake this: it consumes it through the `x_ref` input port,
+# so the same kernel tracks any reference the host feeds it.
+type = "bspline"
+dt = 0.02
+duration = 8.0
+
+degree = 3
+
+# Clamped cubic knots: the ends repeat degree+1 times, so the curve interpolates
+# the first/last control point exactly; the interior knots give C^2 joins. The
+# spline time parameter IS the knot value, so the domain spans [0, duration].
+knots = [0.0, 0.0, 0.0, 0.0, 2.6666666667, 5.3333333333, 8.0, 8.0, 8.0, 8.0]
+
+control_points = [
+    [0.0, 0.0, 0.0],
+    [0.5, 0.40, 0.3],
+    [1.0, 0.60, 0.5],
+    [1.5, 0.40, 0.0],
+    [2.0, 0.00, -0.4],
+    [2.4, -0.30, -0.2],
+]

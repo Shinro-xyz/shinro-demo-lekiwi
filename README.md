@@ -60,24 +60,31 @@ python -m demos.demo_pick_and_place    # pick a block, drive out, place it, driv
 
 ### Compiled control
 
-`demo_compiled_control` runs the base-tracking simulation from a compiled Zig
-kernel instead of the Python controller. Build the artifact once, then run it:
+The base tracks a smooth **B-spline** reference (`configs/trajectories/base_bspline.toml`)
+from a compiled Zig kernel instead of the Python controller. Two control laws are
+compiled:
 
 ```bash
-shinro build scenarios/base_tracking.toml --import shinro_demo_lekiwi --out build/compiled_base
-python -m demos.demo_compiled_control
+shinro build scenarios/base_tracking.toml      --import shinro_demo_lekiwi --out build/compiled_base   # KF + MPC_LTI
+shinro build scenarios/base_tracking_mppi.toml --import shinro_demo_lekiwi --out build/compiled_mppi   # KF + MPPI
+python -m demos.demo_compiled_control          # [mpc|mppi|all]
 ```
 
-The demo loads `build/compiled_base/lib/libbase.so` (the `shinro_step` C ABI)
-and drives the MuJoCo closed loop from it — the host only samples the sensor,
-packs the input ports, and feeds the recurrent `state_*` ports back. It then
-re-runs the scenario with the live Python estimator/controller and reports the
-control parity (currently exact).
+The demo loads each `lib<name>.so` (the `shinro_step` C ABI) and drives the
+MuJoCo closed loop from it — the host only samples the sensor, packs the input
+ports (drawing MPPI's `epsilon` perturbations host-side), and feeds the
+recurrent `state_*` ports back. It checks parity against the live Python loop in
+lockstep (same inputs each tick): MPC reproduces to QP-solver precision (~1e-6),
+MPPI to float exactness (~1e-15).
 
-The build is **ReleaseFast** (`[compile].optimize = "release"`): ~210 KB vs
-~11 MB debug. The kernel is a plain C-ABI artifact, so it is language-agnostic —
-`make interop` calls the same `.so` from C, C++, Zig, and Python and shows they
-agree (see [`interop/`](./interop/)).
+The builds are **ReleaseFast** (`[compile].optimize = "release"`). The kernel is
+a plain C-ABI artifact, so it is language-agnostic — `make interop` calls the
+same `.so` from C, C++, Zig, and Python (see [`interop/`](./interop/)).
+
+> MPPI's closed-loop trajectory is *not* stable against a per-tick difference:
+> its softmax weighting is chaotic, so an independent live run diverges within a
+> few dozen ticks even though every tick matches to ~1e-15. Parity is therefore
+> measured in lockstep, not across two independent runs.
 
 ## Test
 

@@ -1,8 +1,9 @@
-# Base tracking: full closed-loop Trajectory -> LQR -> Kalman -> HolonomicMobileRobot -> MuJoCo.
+# Base tracking: closed-loop Trajectory -> MPC_LTI -> Kalman -> HolonomicMobileRobot.
+# The reference is a clamped cubic B-spline (configs/trajectories/base_bspline.toml).
 [scenario]
 name = "base_tracking"
-description = "LQR + Kalman filter track a straight-line waypoint schedule on the holonomic base"
-duration = 16.0
+description = "MPC_LTI + Kalman filter track a B-spline path on the holonomic base"
+duration = 8.0
 dt = 0.02
 tolerance = { steady_state = 0.05, estimator = 0.03 }
 input_limits = { min = [-0.5, -0.5, -1.0], max = [0.5, 0.5, 1.0] }
@@ -14,16 +15,16 @@ preset = "lekiwi"
 name = "base"
 
 [controller]
-type = "LQR"
-config = "configs/controllers/lqr_base.toml"
+type = "MPC_LTI"
+config = "configs/controllers/mpc_lti_base.toml"
 
 [estimator]
 type = "KalmanFilter"
 config = "configs/estimators/kalman_base.toml"
 
 [trajectory]
-type = "waypoints"
-config = "configs/trajectories/base_straight.toml"
+type = "bspline"
+config = "configs/trajectories/base_bspline.toml"
 
 [sim]
 config = "configs/robot_config.toml"
@@ -31,10 +32,11 @@ config = "configs/robot_config.toml"
 [noise.measurement]
 std = [0.01, 0.01, 0.02]
 
-# Compile-time spec for the e2e compilation pipeline (scripts/gen_scenario.py).
-# n_x / n_u are baked into the graph at trace time ("fixed as compiled").
+# Compile-time spec for the compilation pipeline. n_x / n_u are baked into the
+# graph at trace time; MPC needs its QP solver baked too.
 [compile]
-optimize = "release"     # "debug" | "release" (release -> ReleaseFast)
-artifact_name = "libbase"   # kernel installs as lib/<name>.so
+optimize = "release"
+artifact_name = "libbase"
 n_x = 3
 n_u = 3
+solver = "emosqp"

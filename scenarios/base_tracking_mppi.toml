@@ -1,0 +1,45 @@
+# MPPI base tracking: closed-loop Trajectory -> MPPI -> Kalman -> HolonomicMobileRobot.
+# The reference is the same clamped cubic B-spline as base_tracking.toml.
+#
+# [plant] carries both `name` (so ScenarioFactory builds the sim-backed plant)
+# and `type`/`config` (so the compile pipeline can build the plant for MPPI's
+# rollout). MPPI's sampled perturbations arrive at runtime through a free
+# `epsilon` C-ABI input port — the kernel does no sampling.
+[scenario]
+name = "base_tracking_mppi"
+description = "MPPI + Kalman filter track a B-spline path on the holonomic base"
+duration = 8.0
+dt = 0.02
+input_limits = { min = [-0.5, -0.5, -1.0], max = [0.5, 0.5, 1.0] }
+
+[physics]
+preset = "lekiwi"
+
+[plant]
+name = "base"
+type = "HolonomicMobileRobot"
+config = "configs/plants/holonomic_base.toml"
+
+[controller]
+type = "MPPI"
+config = "configs/controllers/mppi_base.toml"
+
+[estimator]
+type = "KalmanFilter"
+config = "configs/estimators/kalman_base.toml"
+
+[trajectory]
+type = "bspline"
+config = "configs/trajectories/base_bspline.toml"
+
+[sim]
+config = "configs/robot_config.toml"
+
+[noise.measurement]
+std = [0.01, 0.01, 0.02]
+
+[compile]
+optimize = "release"
+artifact_name = "libmppi"
+n_x = 3
+n_u = 3

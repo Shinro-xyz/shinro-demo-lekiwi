@@ -24,16 +24,16 @@ make -C interop        # or: make interop   (from the repo root)
 
 ```
 one shinro_step through four languages — same .so, same inputs:
-  C        0.5 -0.5 -1
-  C++      0.5 -0.5 -1
-  Zig      0.5 -0.5 -1
-  Python   0.5 -0.5 -1
+  C        0.5 -0.5 -0.999999999999999
+  C++      0.5 -0.5 -0.999999999999999
+  Zig      0.5 -0.5 -0.999999999999999
+  Python   0.5 -0.5 -0.999999999999999
 ```
 
 ## Port layout
 
 From `build/compiled_base/graph_data_manifest.json` (for the base-tracking
-KF+LQR graph; other graphs differ):
+KF+MPC graph; other graphs differ):
 
 | Port  | Elements | Layout |
 | ----- | -------- | ------ |
