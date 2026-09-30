@@ -13,6 +13,8 @@ preset = "lekiwi"
 
 [plant]
 name = "arm"
+type = "ArmRobot"
+config = "configs/plants/armrobot.toml"
 
 [controller]
 type = "PID"
@@ -32,12 +34,8 @@ config = "configs/robot_config.toml"
 [noise.measurement]
 std = [0.005, 0.005, 0.005, 0.01, 0.01, 0.01]
 
-# Compile-time spec: the 6-D end-effector pose (n_x) and 6-D Cartesian twist
-# (n_u). The arm plant is not standalone-constructible — RobotSim injects its
-# engine + joint_groups — so the dims stay explicit (a [plant] type/config
-# cannot be derived here).
+# Compile-time spec: the 6-D end-effector pose and 6-D twist are derived from
+# the [plant] section.
 [compile]
 optimize = "release"
 artifact_name = "libarm"
-n_x = 6
-n_u = 6
