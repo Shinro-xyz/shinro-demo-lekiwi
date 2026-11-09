@@ -1,6 +1,6 @@
 # shinro-demo-lekiwi
 
-A **LeKiwi** reference-robot demo for the [shinro control framework](https://github.com/Shinro-xyz/shinro-python-modules):
+A **LeKiwi** reference-robot demo for the [shinro control framework](https://github.com/Shinro-xyz/shinro-control):
 a holonomic 3-wheel base + SO-ARM100 6-DOF arm, simulated in MuJoCo.
 
 The point of this repo is to show shinro's **compiled control** end to end on a
@@ -143,16 +143,16 @@ tree, not a published release). Clone both next to each other:
 
 ```
 parent/
-  shinro-python-modules/
+  shinro-control/
   shinro-demo-lekiwi/
 ```
 
 ```bash
 cd shinro-demo-lekiwi
-make install          # pip install -e ../shinro-python-modules + this repo [mujoco,media,dev]
+make install          # pip install -e ../shinro-control + this repo [mujoco,media,dev]
 ```
 
-Override the framework path with `make install SHINRO=/path/to/shinro-python-modules`.
+Override the framework path with `make install SHINRO=/path/to/shinro-control`.
 Compiling kernels also needs `zig` on `PATH`.
 
 > The bundled MuJoCo model and meshes under `src/shinro_demo_lekiwi/assets/` are

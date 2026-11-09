@@ -1,7 +1,7 @@
 .PHONY: install test test-quick demo interop
 
 # Path to the shinro framework checkout (sibling by default).
-SHINRO ?= ../shinro-python-modules
+SHINRO ?= ../shinro-control
 
 # Install the framework checkout + this repo's extras.
 install:
